@@ -1,6 +1,6 @@
 import style from './Searchbar.module.css'
 
-const Searchbar = ({ onHandleSubmit}) => {
+const Searchbar = ({ search, onHandleChange, onHandleSubmit}) => {
     return (
         <header className={style.Searchbar}>
             <form className={style.SearchForm} onSubmit={onHandleSubmit}>
@@ -15,6 +15,7 @@ const Searchbar = ({ onHandleSubmit}) => {
                         autoComplete="off"
                         autoFocus
                         placeholder="Search images and photos"
+                        
                     />
                 </label>
             </form>
