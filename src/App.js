@@ -1,82 +1,80 @@
 import './App.css';
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import Searchbar from './components/Searchbar/Searchbar';
-import {getPictures} from './components/Api'
+
+import {getPictures} from './components/Api.js'
 import ImageGallery from './components/ImageGallery/ImageGallery';
 import Button from './components/Button/Button';
 import Modal from './components/Modal/Modal';
 import Loader from './components/Loader/Loader';
 
+const App = () => {
+  const [picture, setPicture] = useState([])
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState("")
+  const [isOpenModal, setIsOpenModal] = useState(false)
+  const [largeImageURL, setLargeImageURL] = useState("")
+  const [loader, setLoader] = useState(false)
 
-class App extends Component {
-  state = { 
-    picture: [],
-    page: 1,
-    search: "",
-    isOpenModal: false, 
-    largeImageURL : "",
-    loader: false
+  useEffect(() => {
+    page > 1 && morePictures()
+    page === 1 && search && firstSearch()
+  }, [page, search])
+  
+  const onHandleSubmit = (e) => {
+    e.preventDefault()
+    setPage(1)
+    setSearch(e.target.elements[1].value)
+    setTimeout(() => {
+      scroll()
+    }, 600); 
    }
-
-   onHandleSubmit = (e) => {
-     e.preventDefault()
-     
-     const search = e.target.elements[1].value;
-     this.setState({page: 1, search, picture: []})
-     setTimeout(() => {
-      this.firstSearch()
-     }, 500); 
-     setTimeout(() => {
-       this.scroll()
-     }, 600); 
-    }
-    onHandleMorePicture = (e) => {
-      this.setState(prev=>({page: prev.page += 1}))
-      setTimeout(() => {
-        this.morePictures()
-      }, 500); 
-      setTimeout(() => {
-        this.scroll()
-      }, 600); 
-   }
-   morePictures = () => {
-      this.onToggleLoader()
-      getPictures(this.state.search, this.state.page).then(data=>this.setState(prev=>({picture: [...prev.picture, ...data]}))).finally(this.onToggleLoader())
-   }
-   firstSearch = () => {
-    this.onToggleLoader()
-    getPictures(this.state.search, this.state.page).then(data=>this.setState({picture: data})).finally(this.onToggleLoader())
-   }
-   scroll = () => {
+  const onHandleMorePicture = (e) => {
+    setPage(prev=>(prev + 1))
+ }
+const morePictures = () => {
+    onToggleLoader()
+    getPictures(search, page).
+    then(data=>setPicture(prev=>([...prev, ...data]))).finally(onToggleLoader())
+    setTimeout(() => {
+      scroll()
+    }, 600);
+ }
+const firstSearch = () => {
+    onToggleLoader()
+    getPictures(search, page).
+    then(data=>setPicture(data)).finally(onToggleLoader())
+ }
+const scroll = () => {
     window.scrollTo({
       top: document.body.scrollHeight,
       behavior: "smooth",
     });
-   }
-   onToggleModal = (e) => {
-     this.setState((prev) => ({ isOpenModal: !prev.isOpenModal}))
-   }
-   onModalImageUrl = (e) => {
-    this.setState({largeImageURL: e.target.id})
-    this.onToggleModal()    
-   }
-   onToggleLoader = () => {
-    //  this.setState((prev) =>({loader: !prev.loader}))
-   }
-  render() {
-    return (
-      <>
+ }
+const onToggleModal = (e) => {
+    setIsOpenModal((prev) => (!prev))
+ }
+const onModalImageUrl = (e) => {
+    setLargeImageURL(e.target.id)
+    onToggleModal()    
+ }
+const onToggleLoader = () => {
+   setLoader((prev) =>(!prev))
+ }
+  return (
+    <>
       <Searchbar 
-        onHandleSubmit={this.onHandleSubmit}
+        onHandleSubmit={onHandleSubmit}
       />
-      {this.state.loader && <Loader/>}
-      <ImageGallery pictures={this.state.picture} onToggleModal={this.onModalImageUrl}/>
-      {!!this.state.picture.length  && <Button getMorePictures={this.onHandleMorePicture}/>}
-      {this.state.isOpenModal && <Modal largeImageURL={this.state.largeImageURL} onToggleModal={this.onToggleModal}/>}
-      </>
-    );
-  }
+      {loader && <Loader/>}
+      <ImageGallery pictures={picture} onToggleModal={onModalImageUrl}/>
+      {!!picture.length  && <Button getMorePictures={onHandleMorePicture}/>}
+      {isOpenModal && <Modal largeImageURL={largeImageURL} onToggleModal={onToggleModal}/>}
+    </>
+  );
 }
 
-
 export default App;
+
+
+
